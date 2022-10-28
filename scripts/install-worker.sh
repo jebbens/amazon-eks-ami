@@ -59,6 +59,10 @@ sudo mv $TEMPLATE_DIR/bin/* /usr/bin/
 # Update the OS to begin with to catch up to the latest packages.
 sudo yum update -y
 
+# Install EPEL
+sudo yum install epel-release -y
+sudo yum install -y jq
+
 # Install necessary packages
 sudo yum install -y \
     aws-cfn-bootstrap \
@@ -68,7 +72,6 @@ sudo yum install -y \
     curl \
     ec2-instance-connect \
     ipvsadm \
-    jq \
     nfs-utils \
     socat \
     unzip \
@@ -126,21 +129,23 @@ sudo yum install -y device-mapper-persistent-data lvm2
 
 INSTALL_DOCKER="${INSTALL_DOCKER:-true}"
 if [[ "$INSTALL_DOCKER" == "true" ]]; then
-    sudo amazon-linux-extras enable docker
+    # sudo amazon-linux-extras enable docker
     sudo groupadd -og 1950 docker
     sudo useradd --gid $(getent group docker | cut -d: -f3) docker
 
     # install runc and lock version
-    sudo yum install -y runc-${RUNC_VERSION}
-    sudo yum versionlock runc-*
+    # sudo yum install -y runc-${RUNC_VERSION}
+    # sudo yum versionlock runc-*
 
     # install containerd and lock version
-    sudo yum install -y containerd-${CONTAINERD_VERSION}
-    sudo yum versionlock containerd-*
+    # sudo yum install -y containerd-${CONTAINERD_VERSION}
+    # sudo yum versionlock containerd-*
 
     # install docker and lock version
-    sudo yum install -y docker-${DOCKER_VERSION}*
-    sudo yum versionlock docker-*
+    # sudo yum install -y docker-${DOCKER_VERSION}*
+    sudo swapoff -a
+    sudo yum install -y docker
+    # sudo yum versionlock docker-*
     sudo usermod -aG docker $USER
 
     # Remove all options from sysconfig docker.
@@ -339,7 +344,8 @@ fi
 ### SSM Agent ##################################################################
 ################################################################################
 
-sudo yum install -y amazon-ssm-agent
+# sudo yum install -y amazon-ssm-agent
+sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 
 ################################################################################
 ### AMI Metadata ###############################################################
